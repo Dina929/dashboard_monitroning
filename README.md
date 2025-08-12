@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Monitoring Kandang Ayam</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #0f0f1a;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .header-card {
+            background-color: #1a1a2e;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .header-card h3 {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .info-card {
+            background-color: #1a1a2e;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .info-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .highlight-card {
+            border-radius: 12px;
+            padding: 20px;
+            color: black;
+            font-weight: bold;
+        }
+
+        .yellow-card {
+            background-color: #ffd000;
+        }
+
+        .control-card {
+            border-radius: 8px;
+            padding: 2px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .control-orange {
+            background: linear-gradient(45deg, #ff512f, #dd2476);
+        }
+
+        .control-blue {
+            background: linear-gradient(45deg, #00c6ff, #0072ff);
+        }
+
+        .control-gold {
+            background: linear-gradient(45deg, #f7971e, #ffd200);
+            color: black;
+        }
+
+        .status-ideal {
+            color: #00ff99;
+            font-weight: bold;
+        }
+
+        .big-text {
+            font-size: 2.2rem;
+            font-weight: bold;
+        }
+
+        canvas {
+            background-color: #1a1a2e;
+            border-radius: 12px;
+            padding: 10px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            text-align: center;
+            color: #ffd700;
+        }
+
+        /* Garis suhu kandang */
+        .temp-line {
+            height: 6px;
+            background: linear-gradient(90deg, #ffcc00, #ff6600);
+            border-radius: 4px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container py-4">
+
+        <!-- Header -->
+        <div class="header-card mb-3">
+            <div class="row align-items-center">
+                <div class="col-md-3 col-4 text-center">
+                    <img src="ayam.png" alt="Kandang Ayam" class="rounded-circle shadow"
+                        style="width: 250px; height: 190px; object-fit: cover;">
+                </div>
+                <div class="col-md-9 col-8">
+                    <h3>DASHBOARD MONITORING KANDANG AYAM</h3>
+                    <p class="mb-0">Selamat Datang! <span class="text-info">Ayam Sehat, Telurpun Lezat!</span></p>
+                    <h4 id="clock">00:00:00</h4>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="row g-3">
+
+            <!-- Info Kandang -->
+            <div class="col-md-8">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="info-card">
+                            <p>Jumlah Ayam</p>
+                            <div class="value">3200 ekor</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-card">
+                            <p>Jumlah Pakan</p>
+                            <div class="value">510 Kg</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-card">
+                            <p>Air Minum</p>
+                            <div class="value">180 L</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="highlight-card yellow-card">
+                            <p>💡 Intensitas Cahaya</p>
+                            <p>Status Lampu: <span class="text-success">MENYALA</span></p>
+                            <div class="big-text">48699 Lux</div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="info-card">
+                            <p>🌡 Suhu Kandang</p>
+                            <p class="status-ideal">Status: IDEAL</p>
+                            <div class="big-text">27.6°C</div>
+                            <!-- Garis suhu -->
+                            <div class="temp-line"></div>
+                            <small>Rekomendasi: 24–30°C untuk ayam petelur</small>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="info-card">
+                            <p>⛰ Ketinggian Lokasi</p>
+                            <div class="big-text">452.8 mdpl</div>
+                            <small>Dari permukaan laut</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grafik + Kontrol -->
+            <div class="col-md-4 d-flex flex-column gap-3">
+                <canvas id="grafikSensor" height="150"></canvas>
+
+                <!-- Judul Kontrol -->
+                <div class="section-title">Kontrol Peralatan</div>
+
+                <!-- Kontrol Peralatan -->
+                <div class="control-card control-orange">
+                    <p>🌀 Kipas</p>
+                    <p>Status: Mati</p>
+                    <button class="btn btn-light btn-sm">Nyalakan</button>
+                </div>
+                <div class="control-card control-blue">
+                    <p>💧 Pompa</p>
+                    <p>Status: Mati</p>
+                    <button class="btn btn-light btn-sm">Nyalakan</button>
+                </div>
+                <div class="control-card control-gold">
+                    <p>🍽 Pakan</p>
+                    <p>Status: Mati</p>
+                    <button class="btn btn-dark btn-sm">Nyalakan</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Jam Digital
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent =
+                now.toLocaleTimeString('id-ID', { hour12: false });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Grafik Sensor
+        const ctx = document.getElementById('grafikSensor').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['13:32', '13:33', '13:34', '13:35', '13:36'],
+                datasets: [
+                    {
+                        label: 'Suhu (°C)',
+                        data: [25, 25, 25, 25, 25],
+                        borderColor: '#ffd000',
+                        backgroundColor: '#ffd000',
+                        fill: false,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Kelembapan (%)',
+                        data: [40, 40, 40, 40, 40],
+                        borderColor: '#00c6ff',
+                        backgroundColor: '#00c6ff',
+                        fill: false,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Tekanan (hPa)',
+                        data: [1010, 1010, 1010, 1010, 1010],
+                        borderColor: '#ff00ff',
+                        backgroundColor: '#ff00ff',
+                        fill: false,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                plugins: {
+                    legend: { labels: { color: 'white' } }
+                },
+                scales: {
+                    x: { ticks: { color: 'white' } },
+                    y: { ticks: { color: 'white' } }
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>
